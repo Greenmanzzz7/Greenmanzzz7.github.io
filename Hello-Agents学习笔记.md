@@ -1,7 +1,12 @@
+---
+layout: default
+title: Hello-Agents 学习笔记
+---
+
 # 1. 运行机制
 智能体循环（agent loop)：感知-思考-行动-观察的循环与环境进行交互
 
-![[Pasted image 20260929191043.png]]
+![智能体运行机制](./images/agent-loop.png)
 
 # 2.LLM的工作抽象 并非根据问题来查询内生的知识库
 
@@ -364,11 +369,11 @@ $$
 \mathcal D=\{(x^{(i)},y^{(i)})\}_{i=1}^{N}
 $$
 
-- $N$：训练样本数。
-- $x^{(i)}$：第 $i$ 个输入，例如数学题及相关指令。
-- $y^{(i)}=(y_1^{(i)},\ldots,y_{T_i}^{(i)})$：示范解答的 token 序列，长度为 $T_i$；可包含解题过程、最终答案与结束标记。
-- $y_{<t}^{(i)}$：示范答案中第 $t$ 个 token 之前的部分。
-- $\theta$：模型参数；$p_\theta(y\mid x)$ 表示给定输入时生成目标答案的概率。
+- $$N$$：训练样本数。
+- $$x^{(i)}$$：第 $$i$$ 个输入，例如数学题及相关指令。
+- $$y^{(i)}=(y_1^{(i)},\ldots,y_{T_i}^{(i)})$$：示范解答的 token 序列，长度为 $$T_i$$；可包含解题过程、最终答案与结束标记。
+- $$y_{<t}^{(i)}$$：示范答案中第 $$t$$ 个 token 之前的部分。
+- $$\theta$$：模型参数；$$p_\theta(y\mid x)$$ 表示给定输入时生成目标答案的概率。
 
 #### 1.3 自回归分解：从整段答案到每个 token
 
@@ -404,7 +409,7 @@ $$
 \log p_\theta(y_t^{(i)}\mid x^{(i)},y_{<t}^{(i)})
 $$
 
-为了写成“最小化损失”，加上负号，再除以目标 token 总数 $M=\sum_i T_i$：
+为了写成“最小化损失”，加上负号，再除以目标 token 总数 $$M=\sum_i T_i$$：
 
 $$
 \boxed{\mathcal L(\theta)=-\frac{1}{M}\sum_{i,t}
@@ -413,13 +418,13 @@ $$
 
 这叫**负对数似然**。取对数、加负号以及除以固定的正数，都不改变我们要找到的最优参数。
 
-**为什么它也是交叉熵？** 在一个预测位置，记模型对 token $v$ 的预测概率为 $p(v)$，目标标签为 $q(v)$：示范 token 对应的值为 1，其余为 0（one-hot 标签）。交叉熵就是：
+**为什么它也是交叉熵？** 在一个预测位置，记模型对 token $$v$$ 的预测概率为 $$p(v)$$，目标标签为 $$q(v)$$：示范 token 对应的值为 1，其余为 0（one-hot 标签）。交叉熵就是：
 
 $$
 \boxed{\ell=-\sum_{v\in\mathcal V}q(v)\log p(v)=-\log p(y_t)}
 $$
 
-因为只有示范 token 的 $q(v)$ 为 1，求和后只剩一项。因此，**使用 one-hot 标签时，最小化交叉熵就是最小化负对数似然，也就是最大化示范答案的似然。**
+因为只有示范 token 的 $$q(v)$$ 为 1，求和后只剩一项。因此，**使用 one-hot 标签时，最小化交叉熵就是最小化负对数似然，也就是最大化示范答案的似然。**
 
 #### 1.5 正向传播：计算预测概率与损失
 
@@ -431,7 +436,7 @@ $$
 z=f_\theta(x,y_{<t})
 $$
 
-其中 $z_v$ 是 token $v$ 的分数（logit）。用 softmax 将分数变成概率，再取出示范 token 的概率计算损失：
+其中 $$z_v$$ 是 token $$v$$ 的分数（logit）。用 softmax 将分数变成概率，再取出示范 token 的概率计算损失：
 
 $$
 p(v)=\frac{e^{z_v}}{\sum_{u\in\mathcal V}e^{z_u}},
@@ -439,7 +444,7 @@ p(v)=\frac{e^{z_v}}{\sum_{u\in\mathcal V}e^{z_u}},
 \ell=-\log p(y_t)
 $$
 
-例如，假设词表只有三个 token，分数为 $z=(\ln2,\ln3,\ln5)$，示范 token 是第二个，则：
+例如，假设词表只有三个 token，分数为 $$z=(\ln2,\ln3,\ln5)$$，示范 token 是第二个，则：
 
 $$
 p=(0.2,0.3,0.5),\qquad q=(0,1,0)
@@ -456,7 +461,7 @@ $$
 \boxed{\mathcal L_{\mathrm{batch}}=\frac{1}{M_B}\sum_{j=1}^{M_B}\ell_j}
 $$
 
-$M_B$ 是该批次的有效目标 token 数。这里假设只对示范回答计算损失，排除题目和 padding；题目仍作为输入上下文。预测每个位置时，使用的是**示范答案的前缀**，这种训练方式叫 Teacher forcing。
+$$M_B$$ 是该批次的有效目标 token 数。这里假设只对示范回答计算损失，排除题目和 padding；题目仍作为输入上下文。预测每个位置时，使用的是**示范答案的前缀**，这种训练方式叫 Teacher forcing。
 
 #### 1.6 反向传播与梯度下降：计算梯度、更新参数
 
@@ -474,7 +479,7 @@ $$
 \frac{\partial\ell}{\partial z}=(0.2,-0.7,0.5)
 $$
 
-接着，用链式法则将这个梯度传回模型参数。对任意一个可训练参数 $\theta_a$：
+接着，用链式法则将这个梯度传回模型参数。对任意一个可训练参数 $$\theta_a$$：
 
 $$
 \frac{\partial\mathcal L_{\mathrm{batch}}}{\partial\theta_a}
@@ -483,7 +488,7 @@ $$
 \underbrace{\frac{\partial z_{j,v}}{\partial\theta_a}}_{\text{分数对参数的梯度}}
 $$
 
-其中 $j$ 表示预测位置。深度学习框架通过自动求导完成这一步，无需手动计算整个网络。
+其中 $$j$$ 表示预测位置。深度学习框架通过自动求导完成这一步，无需手动计算整个网络。
 
 得到梯度后，以普通梯度下降为例，沿梯度的反方向更新参数：
 
@@ -491,7 +496,7 @@ $$
 \boxed{\theta_{k+1}=\theta_k-\eta\nabla_\theta\mathcal L_{\mathrm{batch}}(\theta_k)}
 $$
 
-$k$ 是更新步数，$\eta$ 是学习率。例如，某个参数为 $0.50$，梯度为 $0.20$，学习率为 $0.01$，则：
+$$k$$ 是更新步数，$$\eta$$ 是学习率。例如，某个参数为 $$0.50$$，梯度为 $$0.20$$，学习率为 $$0.01$$，则：
 
 $$
 \theta_{a,\mathrm{new}}=0.50-0.01\times0.20=0.498
@@ -517,30 +522,30 @@ $$
 
 #### 2.1 把文本生成表示为决策过程
 
-用马尔可夫决策过程表示任务：$\mathcal M=(\mathcal S,\mathcal A,P,R,\gamma)$。
+用马尔可夫决策过程表示任务：$$\mathcal M=(\mathcal S,\mathcal A,P,R,\gamma)$$。
 
 | 符号 | 含义 | 数学解题中的对应物 |
 | --- | --- | --- |
-| $s_t\in\mathcal S$ | 状态 | 题目和已生成的文本 |
-| $a_t\in\mathcal A$ | 行动 | 下一个 token |
-| $P(s_{t+1}\mid s_t,a_t)$ | 状态转移 | 把新 token 接到文本后面 |
-| $r_t$ | 当步奖励 | 例如回答结束后，答对得 1 分，答错得 0 分 |
-| $\gamma$ | 折扣因子 | 决定未来奖励的权重 |
-| $\pi_\theta(a_t\mid s_t)$ | 策略 | 模型对下一个 token 的概率分布 |
+| $$s_t\in\mathcal S$$ | 状态 | 题目和已生成的文本 |
+| $$a_t\in\mathcal A$$ | 行动 | 下一个 token |
+| $$P(s_{t+1}\mid s_t,a_t)$$ | 状态转移 | 把新 token 接到文本后面 |
+| $$r_t$$ | 当步奖励 | 例如回答结束后，答对得 1 分，答错得 0 分 |
+| $$\gamma$$ | 折扣因子 | 决定未来奖励的权重 |
+| $$\pi_\theta(a_t\mid s_t)$$ | 策略 | 模型对下一个 token 的概率分布 |
 
-一条轨迹 $\tau=(s_0,a_0,r_0,\ldots,s_T)$ 记录一次完整任务。纯文本生成的状态转移很简单；工具型 Agent 的轨迹还包含工具执行和返回的观察。若环境信息不可完全观察，可用交互历史作为模型输入。
+一条轨迹 $$\tau=(s_0,a_0,r_0,\ldots,s_T)$$ 记录一次完整任务。纯文本生成的状态转移很简单；工具型 Agent 的轨迹还包含工具执行和返回的观察。若环境信息不可完全观察，可用交互历史作为模型输入。
 
-从第 $t$ 步开始的回报是：
+从第 $$t$$ 步开始的回报是：
 
 $$
 G_t=\sum_{k=t}^{T-1}\gamma^{k-t}r_k
 $$
 
-**奖励是某一步的分数，回报是之后各步奖励的累计。** 对有限长度的数学解答，下面取 $\gamma=1$；若只有结束时评分，各步的回报都是最终分数。$\gamma=1$ 表示不折扣未来奖励，不代表模型一定能正确规划。
+**奖励是某一步的分数，回报是之后各步奖励的累计。** 对有限长度的数学解答，下面取 $$\gamma=1$$；若只有结束时评分，各步的回报都是最终分数。$$\gamma=1$$ 表示不折扣未来奖励，不代表模型一定能正确规划。
 
 #### 2.2 优化目标：提高平均得分
 
-令 $x$ 是题目，$y$ 是模型生成的答案，$R(x,y)$ 是答案奖励：
+令 $$x$$ 是题目，$$y$$ 是模型生成的答案，$$R(x,y)$$ 是答案奖励：
 
 $$
 \pi_\theta(y\mid x)=\prod_{t=1}^{T}\pi_\theta(y_t\mid x,y_{<t})
@@ -550,11 +555,11 @@ $$
 \boxed{J(\theta)=\mathbb E_{x\sim\mathcal D,\,y\sim\pi_\theta(\cdot\mid x)}[R(x,y)]}
 $$
 
-目标是最大化 $J$，即让模型在题目分布上的**期望奖励**更高。例如奖励为“答对 1、答错 0”时，期望奖励就是该生成策略的正确率。
+目标是最大化 $$J$$，即让模型在题目分布上的**期望奖励**更高。例如奖励为“答对 1、答错 0”时，期望奖励就是该生成策略的正确率。
 
 #### 2.3 策略梯度：评分怎样变成参数梯度
 
-先固定一道题，假设奖励函数本身不依赖模型参数。利用 $\nabla p=p\nabla\log p$：
+先固定一道题，假设奖励函数本身不依赖模型参数。利用 $$\nabla p=p\nabla\log p$$：
 
 $$
 \begin{aligned}
@@ -578,7 +583,7 @@ $$
 \boxed{A^\pi(s,a)=Q^\pi(s,a)-V^\pi(s)}
 $$
 
-$V$ 表示当前状态通常能得多少分，$Q$ 表示采取某个行动后通常能得多少分，优势 $A$ 表示该行动比平均水平好多少。实际训练用估计值 $\hat A$。[策略梯度推导](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html)
+$$V$$ 表示当前状态通常能得多少分，$$Q$$ 表示采取某个行动后通常能得多少分，优势 $$A$$ 表示该行动比平均水平好多少。实际训练用估计值 $$\hat A$$。[策略梯度推导](https://spinningup.openai.com/en/latest/spinningup/rl_intro3.html)
 
 #### 2.4 正向计算损失，反向更新参数
 
@@ -590,17 +595,17 @@ $$
 \operatorname{stopgrad}(\hat A_{i,t})\log\pi_\theta(a_{i,t}\mid s_{i,t})}
 $$
 
-$B$ 是轨迹数；$\operatorname{stopgrad}$ 表示把优势当作常数，不通过优势反向传播。这个式子用于当前策略样本的一次更新；复用旧样本时还需考虑下一节的概率比率。
+$$B$$ 是轨迹数；$$\operatorname{stopgrad}$$ 表示把优势当作常数，不通过优势反向传播。这个式子用于当前策略样本的一次更新；复用旧样本时还需考虑下一节的概率比率。
 
 正向计算：对已采样轨迹重新计算 logits → softmax 概率 → 取出已生成 token 的概率 → 计算上述损失。采样生成阶段与这次带梯度的前向计算可以分开进行。
 
-以单个位置为例，若生成 token 的概率为 $0.3$，优势为 $+1$：
+以单个位置为例，若生成 token 的概率为 $$0.3$$，优势为 $$+1$$：
 
 $$
 \ell=-1\times\log0.3\approx1.204
 $$
 
-若优势为 $-1$，则 $\ell\approx-1.204$。**策略损失可以为负，它不是错误率。** 对词表中 token $v$ 的 logit，梯度为：
+若优势为 $$-1$$，则 $$\ell\approx-1.204$$。**策略损失可以为负，它不是错误率。** 对词表中 token $$v$$ 的 logit，梯度为：
 
 $$
 \frac{\partial\ell}{\partial z_v}
@@ -619,9 +624,9 @@ $$
 
 先区分三个模型角色：
 
-- $\pi_\theta$：当前正在更新的策略。
-- $\pi_{\mathrm{old}}$：生成本批样本的旧策略快照，在这批数据的更新期间固定。
-- $\pi_{\mathrm{ref}}$：用于限制偏离程度的参考策略，通常在一个训练阶段内固定。
+- $$\pi_\theta$$：当前正在更新的策略。
+- $$\pi_{\mathrm{old}}$$：生成本批样本的旧策略快照，在这批数据的更新期间固定。
+- $$\pi_{\mathrm{ref}}$$：用于限制偏离程度的参考策略，通常在一个训练阶段内固定。
 
 重要性采样的基本恒等式是：
 
@@ -630,13 +635,13 @@ $$
 =\mathbb E_{a\sim q}\left[\frac{p(a)}{q(a)}f(a)\right]
 $$
 
-要求 $p(a)>0$ 的位置有 $q(a)>0$。在同一个采样状态下，定义：
+要求 $$p(a)>0$$ 的位置有 $$q(a)>0$$。在同一个采样状态下，定义：
 
 $$
 \rho_t(\theta)=\frac{\pi_\theta(a_t\mid s_t)}{\pi_{\mathrm{old}}(a_t\mid s_t)}
 $$
 
-$\rho_t>1$ 表示当前模型比旧模型更倾向于这个 token。它不等于奖励；这里用 $\rho$ 避免与奖励 $r$ 混淆。单步比率也不等于对整条轨迹分布的完全校正，PPO 使用的是局部替代目标。
+$$\rho_t>1$$ 表示当前模型比旧模型更倾向于这个 token。它不等于奖励；这里用 $$\rho$$ 避免与奖励 $$r$$ 混淆。单步比率也不等于对整条轨迹分布的完全校正，PPO 使用的是局部替代目标。
 
 PPO-Clip 最大化：
 
@@ -647,7 +652,7 @@ J_{\mathrm{clip}}=\mathbb E_t\left[
 \right]
 $$
 
-训练时最小化 $\mathcal L_{\mathrm{policy}}=-J_{\mathrm{clip}}$。例如 $\hat A=1$、$\rho=1.5$、$\epsilon=0.2$，该项取 $\min(1.5,1.2)=1.2$，不再奖励继续增大这个比率。
+训练时最小化 $$\mathcal L_{\mathrm{policy}}=-J_{\mathrm{clip}}$$。例如 $$\hat A=1$$、$$\rho=1.5$$、$$\epsilon=0.2$$，该项取 $$\min(1.5,1.2)=1.2$$，不再奖励继续增大这个比率。
 
 **裁剪削弱过度更新的动力，并非硬性保证所有概率比率都在区间内。** [PPO 官方教学文档](https://spinningup.openai.com/en/latest/algorithms/ppo.html)
 
@@ -660,9 +665,9 @@ K_\theta(s)=D_{\mathrm{KL}}(\pi_\theta(\cdot\mid s)\|\pi_{\mathrm{ref}}(\cdot\mi
 =\sum_a\pi_\theta(a\mid s)\log\frac{\pi_\theta(a\mid s)}{\pi_{\mathrm{ref}}(a\mid s)}
 $$
 
-若加入 KL 正则，可写为 $\mathcal L=-J_{\mathrm{clip}}+\beta\mathbb E_s[K_\theta(s)]$。$\beta$ 越大，偏离参考策略的代价越高。KL 是可选设计；原始 PPO-Clip 不要求这项，它也不能保证消除奖励作弊。[PPO 的两类约束方式](https://spinningup.openai.com/en/latest/algorithms/ppo.html)
+若加入 KL 正则，可写为 $$\mathcal L=-J_{\mathrm{clip}}+\beta\mathbb E_s[K_\theta(s)]$$。$$\beta$$ 越大，偏离参考策略的代价越高。KL 是可选设计；原始 PPO-Clip 不要求这项，它也不能保证消除奖励作弊。[PPO 的两类约束方式](https://spinningup.openai.com/en/latest/algorithms/ppo.html)
 
-**GAE（广义优势估计）**常用于 PPO：用价值网络 $V_\phi$ 预测未来回报，再组合多步误差：
+**GAE（广义优势估计）**常用于 PPO：用价值网络 $$V_\phi$$ 预测未来回报，再组合多步误差：
 
 $$
 \delta_t=r_t+\gamma V_\phi(s_{t+1})-V_\phi(s_t)
@@ -672,18 +677,18 @@ $$
 \boxed{\hat A_t=\sum_{l=0}^{T-1-t}(\gamma\lambda)^l\delta_{t+l}}
 $$
 
-真正终止时令 $V_\phi(s_T)=0$；若只是采样被截断，通常需要保留末端价值估计。$\lambda$ 控制使用多远的后续信息，帮助在偏差与方差之间折中。价值网络另用回归损失训练，例如：
+真正终止时令 $$V_\phi(s_T)=0$$；若只是采样被截断，通常需要保留末端价值估计。$$\lambda$$ 控制使用多远的后续信息，帮助在偏差与方差之间折中。价值网络另用回归损失训练，例如：
 
 $$
 \mathcal L_V(\phi)=\frac{1}{M}\sum_t
 \left(V_\phi(s_t)-\operatorname{stopgrad}(\hat G_t)\right)^2
 $$
 
-$\hat G_t$ 是回报目标。策略网络负责选择行动，价值网络负责估计前景，两者作用不同。[GAE 原论文](https://arxiv.org/abs/1506.02438)
+$$\hat G_t$$ 是回报目标。策略网络负责选择行动，价值网络负责估计前景，两者作用不同。[GAE 原论文](https://arxiv.org/abs/1506.02438)
 
 #### 2.7 GRPO：用同题多份回答计算优势
 
-GRPO 对同一道题采样 $G$ 份回答 $y_1,\ldots,y_G$，分别评分 $R_1,\ldots,R_G$。以结果奖励为例：
+GRPO 对同一道题采样 $$G$$ 份回答 $$y_1,\ldots,y_G$$，分别评分 $$R_1,\ldots,R_G$$。以结果奖励为例：
 
 $$
 \bar R=\frac1G\sum_iR_i,\qquad
@@ -691,11 +696,11 @@ $$
 \hat A_i=\frac{R_i-\bar R}{\sigma_R+\varepsilon_{\mathrm{num}}}
 $$
 
-这里用总体标准差方便演示；实际实现可能使用不同标准差约定。$\varepsilon_{\mathrm{num}}$ 是防止除零的小数，与裁剪阈值 $\epsilon$ 不同。
+这里用总体标准差方便演示；实际实现可能使用不同标准差约定。$$\varepsilon_{\mathrm{num}}$$ 是防止除零的小数，与裁剪阈值 $$\epsilon$$ 不同。
 
-例如奖励为 $(1,0,1,0)$，则均值为 $0.5$，标准差为 $0.5$，优势约为 $(1,-1,1,-1)$。同一回答的各个生成 token 共用这个序列优势，**无需另训练价值网络**。这依赖奖励的相对大小，不只是排序。[DeepSeekMath：GRPO 原始定义](https://arxiv.org/html/2402.03300v3#S4)
+例如奖励为 $$(1,0,1,0)$$，则均值为 $$0.5$$，标准差为 $$0.5$$，优势约为 $$(1,-1,1,-1)$$。同一回答的各个生成 token 共用这个序列优势，**无需另训练价值网络**。这依赖奖励的相对大小，不只是排序。[DeepSeekMath：GRPO 原始定义](https://arxiv.org/html/2402.03300v3#S4)
 
-令回答长度为 $T_i$，概率比率为 $\rho_{i,t}=\pi_\theta(y_{i,t}\mid x,y_{i,<t})/\pi_{\mathrm{old}}(y_{i,t}\mid x,y_{i,<t})$。一个经典形式的批次损失可写为：
+令回答长度为 $$T_i$$，概率比率为 $$\rho_{i,t}=\pi_\theta(y_{i,t}\mid x,y_{i,<t})/\pi_{\mathrm{old}}(y_{i,t}\mid x,y_{i,<t})$$。一个经典形式的批次损失可写为：
 
 $$
 \boxed{
@@ -707,7 +712,7 @@ $$
 }
 $$
 
-$\widehat K$ 表示实现采用的 KL 估计项。此处展示组内一题，多题时再求平均。KL 系数、长度归一化、奖励标准化在不同实现中可能不同，不能只凭算法名判断代码细节。
+$$\widehat K$$ 表示实现采用的 KL 估计项。此处展示组内一题，多题时再求平均。KL 系数、长度归一化、奖励标准化在不同实现中可能不同，不能只凭算法名判断代码细节。
 
 若同组奖励全相同，优势为 0，该组没有这部分相对奖励梯度；若设置了 KL 项，仍可能有 KL 梯度。整个回答共用分数也不代表其中每一步都正确，这就是信用分配需要解决的问题。[TRL GRPO 文档](https://huggingface.co/docs/trl/grpo_trainer)
 
