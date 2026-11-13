@@ -387,7 +387,7 @@ p_\theta(y\mid x)
 \cdot p_\theta(\text{。}\mid x,\text{等于2})
 $$
 
-上述划分仅用于说明，实际 token 边界由分词器决定。
+实践中 token 边界由具体使用的分词器决定。
 
 #### 1.4 从最大似然推导交叉熵损失
 
