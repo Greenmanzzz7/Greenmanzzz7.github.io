@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>{{ page.title | default: site.title | escape }}</title>
+<style>
+:root{color-scheme:light;--ink:#243447;--muted:#64748b;--line:#dde5ed;--accent:#24635c}
+*{box-sizing:border-box}html{scroll-behavior:smooth;scroll-padding-top:32px}
+body{margin:0;background:#f6f8fa;color:var(--ink);font:17px/1.85 system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif}
+header{padding:22px max(24px,calc((100vw - 1280px)/2));border-bottom:1px solid var(--line);background:white}
+header a{font-weight:700;text-decoration:none}a{color:var(--accent)}
+.shell{max-width:1280px;margin:auto;display:grid;grid-template-columns:240px minmax(0,1fr);gap:42px;padding:38px 24px}
+aside{position:sticky;top:24px;align-self:start;max-height:90vh;overflow:auto;font-size:14px}
+aside strong{display:block;margin-bottom:12px}aside a{display:block;padding:5px 10px;border-left:2px solid var(--line);text-decoration:none;color:var(--muted)}aside a:hover{color:var(--accent);border-color:var(--accent)}
+article{min-width:0;background:white;border:1px solid var(--line);border-radius:16px;padding:40px 48px}
+h1,h2,h3,h4{line-height:1.4;color:#172d38}h1{font-size:30px;margin-top:2em}h1:first-child{margin-top:0}h2{font-size:24px;margin-top:2em;padding-bottom:12px;border-bottom:1px solid var(--line)}h3{font-size:20px;margin-top:1.8em}h4{font-size:18px;margin-top:1.6em}
+img{max-width:100%;height:auto;display:block;margin:24px auto}pre{padding:20px;background:#f1f5f8;border-radius:10px;overflow:auto;font-size:14px;line-height:1.65}code{font-family:ui-monospace,monospace;font-size:.88em}p code,li code{background:#eef3f5;padding:2px 5px;border-radius:4px}
+table{display:block;overflow:auto;border-collapse:collapse;font-size:15px;margin:24px 0}th,td{padding:10px 14px;border:1px solid var(--line);text-align:left}th{background:#edf4f2}
+blockquote{border-left:4px solid #6fa296;margin:24px 0;padding:8px 20px;background:#f3f8f6}
+.MathJax_Display{overflow-x:auto;overflow-y:hidden;padding:12px 0}footer{font-size:13px;color:var(--muted);margin-top:36px}
+@media(max-width:850px){.shell{display:block;padding:20px 12px}aside{position:static;max-height:240px;margin:0 12px 24px}article{padding:24px 20px}h1{font-size:26px}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+<script type="text/x-mathjax-config">
+MathJax.Hub.Config({tex2jax:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']],processEscapes:true},showMathMenu:false});
+</script>
+<script defer src="https://cdn.jsdelivr.net/npm/mathjax@2.7.9/MathJax.js?config=TeX-AMS_HTML"></script>
+</head>
+<body>
+<header><a href="{{ '/' | relative_url }}">Greenman · 学习笔记</a></header>
+<div class="shell"><aside aria-label="文章目录"><strong>本页目录</strong><nav id="toc"></nav></aside>
+<article id="content">{{ content }}<footer>学习、实践与复盘 · Greenman</footer></article></div>
+<script>
+document.querySelectorAll('#content h1,#content h2,#content h3').forEach((h,i)=>{
+if(!h.id)h.id='section-'+i;
+const a=document.createElement('a');a.href='#'+encodeURIComponent(h.id);a.textContent=h.textContent;
+a.style.paddingLeft=(10+(Number(h.tagName[1])-1)*10)+'px';document.getElementById('toc').append(a);
+});
+</script>
+</body></html>

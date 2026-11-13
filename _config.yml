@@ -1,0 +1,5 @@
+title: Greenman 学习笔记
+markdown: kramdown
+kramdown:
+  input: GFM
+  math_engine: mathjax
